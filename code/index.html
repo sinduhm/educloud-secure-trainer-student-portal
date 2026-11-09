@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduCloud Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1B2A4A;
+    --navy-light:#2B3E63;
+    --paper:#F7F5F1;
+    --panel:#FFFFFF;
+    --teal:#3E8987;
+    --gold:#C99A44;
+    --ink:#1C1C1E;
+    --ink-soft:#5B5F6B;
+    --line:#E4E1D9;
+    --error:#B3452E;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  h1,h2,h3{
+    font-family:'Source Serif 4',serif;
+    font-weight:600;
+    margin:0;
+  }
+  a{color:inherit;}
+
+  /* ---------- Shell layout ---------- */
+  .shell{
+    display:grid;
+    grid-template-columns:220px 1fr;
+    min-height:100vh;
+  }
+  .side{
+    background:var(--navy);
+    color:#EDEBE3;
+    padding:28px 20px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .side .brand{
+    font-family:'Source Serif 4',serif;
+    font-size:1.35rem;
+    color:#fff;
+    margin-bottom:6px;
+  }
+  .side .brand span{color:var(--gold);}
+  .side .tagline{
+    font-size:.8rem;
+    color:#AEB6C9;
+    margin-bottom:28px;
+    line-height:1.4;
+  }
+  .navbtn{
+    text-align:left;
+    background:none;
+    border:none;
+    color:#CBD1E0;
+    padding:10px 12px;
+    border-radius:6px;
+    font-size:.92rem;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .navbtn:hover{background:var(--navy-light);color:#fff;}
+  .navbtn.active{background:var(--navy-light);color:#fff;border-left:3px solid var(--gold);padding-left:9px;}
+  .side .role-select{margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,.12);}
+  .side select{
+    width:100%;
+    padding:8px 10px;
+    border-radius:6px;
+    border:1px solid #3A4C72;
+    background:var(--navy-light);
+    color:#fff;
+    font-family:'Inter',sans-serif;
+    font-size:.85rem;
+  }
+  .side label{font-size:.72rem;color:#8E96AC;display:block;margin-bottom:6px;}
+
+  main{padding:36px 44px;max-width:920px;}
+  .view{display:none;}
+  .view.active{display:block;}
+  .view-head{margin-bottom:26px;}
+  .view-head p{color:var(--ink-soft);font-size:.92rem;margin-top:6px;max-width:60ch;}
+
+  /* ---------- Panels / cards ---------- */
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:22px 24px;
+    margin-bottom:22px;
+  }
+  .panel h3{font-size:1.02rem;margin-bottom:14px;}
+
+  .stat-row{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:26px;}
+  .stat{
+    flex:1 1 150px;
+    background:var(--navy);
+    color:#fff;
+    border-radius:8px;
+    padding:18px 20px;
+  }
+  .stat .num{font-family:'Source Serif 4',serif;font-size:2rem;color:var(--gold);}
+  .stat .label{font-size:.78rem;color:#C7CCDA;margin-top:2px;}
+  .stat-icon{font-size:1.3rem;margin-bottom:6px;opacity:.85;}
+  #lastUpdated{color:var(--ink-soft);font-style:italic;}
+  .live-dot{
+    display:inline-block;width:7px;height:7px;border-radius:50%;
+    background:#3EA96B;margin-right:5px;
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1;} 50%{opacity:.35;}
+  }
+
+  /* ---------- Activity feed ---------- */
+  .empty-note{color:var(--ink-soft);font-style:italic;font-size:.85rem;margin:4px 0;}
+  .activity-item{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+    font-size:.86rem;
+  }
+  .activity-item:last-child{border-bottom:none;}
+  .activity-icon{
+    width:30px;height:30px;flex:0 0 30px;
+    border-radius:6px;
+    background:#F0EEE7;
+    display:flex;align-items:center;justify-content:center;
+    font-size:.95rem;
+  }
+  .activity-item.upload .activity-icon{background:#E4F0EF;}
+  .activity-item.submission .activity-icon{background:#F6EEDD;}
+  .activity-text strong{font-weight:600;}
+  .activity-time{color:var(--ink-soft);font-size:.76rem;margin-top:2px;}
+
+  form{display:flex;flex-direction:column;gap:12px;}
+  .field label{display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:4px;}
+  .field input,.field select{
+    width:100%;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    font-family:'Inter',sans-serif;
+    font-size:.9rem;
+    background:#FCFBF9;
+  }
+  .field input:focus,.field select:focus{outline:2px solid var(--teal);outline-offset:1px;}
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  button.primary{
+    align-self:flex-start;
+    background:var(--teal);
+    color:#fff;
+    border:none;
+    padding:10px 18px;
+    border-radius:6px;
+    font-family:'Inter',sans-serif;
+    font-weight:500;
+    font-size:.88rem;
+    cursor:pointer;
+  }
+  button.primary:hover{background:#336F6D;}
+  button.primary:disabled{background:#9FB2B1;cursor:default;}
+
+  .msg{font-size:.85rem;padding:9px 12px;border-radius:6px;margin-top:4px;display:none;}
+  .msg.ok{display:block;background:#E9F3EC;color:#2C6E3F;border:1px solid #C4E2CC;}
+  .msg.err{display:block;background:#FBEAE6;color:var(--error);border:1px solid #F2C7BC;}
+
+  table{width:100%;border-collapse:collapse;font-size:.88rem;}
+  th{
+    text-align:left;
+    font-weight:500;
+    color:var(--ink-soft);
+    font-size:.76rem;
+    padding:8px 10px;
+    border-bottom:1px solid var(--line);
+  }
+  td{padding:10px 10px;border-bottom:1px solid var(--line);}
+  tr:last-child td{border-bottom:none;}
+  .empty-row td{color:var(--ink-soft);font-style:italic;padding:16px 10px;}
+  .dl-link{color:var(--teal);text-decoration:none;font-weight:500;}
+  .dl-link:hover{text-decoration:underline;}
+
+  .config-note{
+    font-size:.78rem;
+    color:var(--ink-soft);
+    background:#FBF6EA;
+    border:1px solid #EEE0BE;
+    border-radius:6px;
+    padding:10px 14px;
+    margin-bottom:24px;
+  }
+  .config-note code{background:#F1E9D2;padding:1px 5px;border-radius:3px;}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="side">
+    <div class="brand">Edu<span>Cloud</span></div>
+    <div class="tagline">Trainer–student file portal</div>
+
+    <button class="navbtn active" data-view="dashboard">Dashboard</button>
+    <button class="navbtn" data-view="materials">Materials</button>
+    <button class="navbtn" data-view="assignments">Assignments</button>
+    <button class="navbtn" data-view="students">Students</button>
+    <button class="navbtn" data-view="trainers">Trainers</button>
+
+    <div class="role-select">
+      <label for="roleSelect">Viewing as</label>
+      <select id="roleSelect">
+        <option value="trainer">Trainer</option>
+        <option value="student">Student</option>
+        <option value="support">Support staff</option>
+      </select>
+    </div>
+  </nav>
+
+  <main>
+    <!-- ================= DASHBOARD ================= -->
+    <section class="view active" id="view-dashboard">
+      <div class="view-head">
+        <h1>Dashboard</h1>
+        <p>Live counts pulled from the <code>getStats</code> action. <span id="lastUpdated"></span></p>
+      </div>
+      <div class="stat-row" id="statRow">
+        <div class="stat">
+          <div class="stat-icon">🎓</div>
+          <div class="num" id="statStudents">–</div>
+          <div class="label">Students</div>
+        </div>
+        <div class="stat">
+          <div class="stat-icon">🧑‍🏫</div>
+          <div class="num" id="statTrainers">–</div>
+          <div class="label">Trainers</div>
+        </div>
+        <div class="stat">
+          <div class="stat-icon">📄</div>
+          <div class="num" id="statMaterials">–</div>
+          <div class="label">Materials uploaded</div>
+        </div>
+        <div class="stat">
+          <div class="stat-icon">📦</div>
+          <div class="num" id="statSubmissions">–</div>
+          <div class="label">Assignments submitted</div>
+        </div>
+      </div>
+      <button class="primary" onclick="loadStats(); loadActivity();">Refresh</button>
+
+      <div class="panel" style="margin-top:22px;">
+        <h3>Recent activity</h3>
+        <div id="activityList">
+          <p class="empty-note">Loading…</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= MATERIALS ================= -->
+    <section class="view" id="view-materials">
+      <div class="view-head">
+        <h1>Materials</h1>
+        <p>Trainers upload study material to S3; students browse and download via CloudFront.</p>
+      </div>
+
+      <div class="panel" id="uploadPanel">
+        <h3>Upload material (trainer)</h3>
+        <form id="uploadForm">
+          <div class="field"><label>Uploader name</label><input type="text" id="uploaderName" required></div>
+          <div class="field"><label>File</label><input type="file" id="materialFile" required></div>
+          <button class="primary" type="submit">Upload</button>
+          <div class="msg" id="uploadMsg"></div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h3>Available materials</h3>
+        <table>
+          <thead><tr><th>File</th><th>Uploader</th><th>Date</th><th></th></tr></thead>
+          <tbody id="materialsBody"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= ASSIGNMENTS ================= -->
+    <section class="view" id="view-assignments">
+      <div class="view-head">
+        <h1>Assignments</h1>
+        <p>Students submit work as .tar.gz; trainers and support review submissions.</p>
+      </div>
+
+      <div class="panel" id="submitPanel">
+        <h3>Submit assignment (student)</h3>
+        <form id="submitForm">
+          <div class="row-2">
+            <div class="field"><label>Your email</label><input type="email" id="studentEmail" required></div>
+            <div class="field"><label>Assignment name</label><input type="text" id="assignmentName" required></div>
+          </div>
+          <div class="field"><label>File</label><input type="file" id="assignmentFile" required></div>
+          <p class="empty-note" style="margin:-4px 0 0;">Any file type — it's automatically zipped before upload.</p>
+          <button class="primary" type="submit">Submit assignment</button>
+          <div class="msg" id="submitMsg"></div>
+        </form>
+      </div>
+
+      <div class="panel" id="submissionsPanel">
+        <h3>Submissions</h3>
+        <table>
+          <thead><tr><th>Student</th><th>Assignment</th><th>File</th><th>Date</th><th></th></tr></thead>
+          <tbody id="submissionsBody"><tr class="empty-row"><td colspan="5">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= STUDENTS ================= -->
+    <section class="view" id="view-students">
+      <div class="view-head">
+        <h1>Students</h1>
+        <p>Registering a student also subscribes their email to upload notifications via SNS.</p>
+      </div>
+
+      <div class="panel" id="addStudentPanel">
+        <h3>Add student (trainer)</h3>
+        <form id="studentForm">
+          <div class="row-2">
+            <div class="field"><label>Name</label><input type="text" id="studentName" required></div>
+            <div class="field"><label>Email</label><input type="email" id="studentEmailNew" required></div>
+          </div>
+          <div class="field"><label>Group</label><input type="text" id="studentGroup" placeholder="e.g. batch-2026" required></div>
+          <button class="primary" type="submit">Add student</button>
+          <div class="msg" id="studentMsg"></div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h3>Registered students</h3>
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Group</th></tr></thead>
+          <tbody id="studentsBody"><tr class="empty-row"><td colspan="3">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= TRAINERS ================= -->
+    <section class="view" id="view-trainers">
+      <div class="view-head">
+        <h1>Trainers</h1>
+        <p>Add and list trainer accounts.</p>
+      </div>
+
+      <div class="panel" id="addTrainerPanel">
+        <h3>Add trainer</h3>
+        <form id="trainerForm">
+          <div class="row-2">
+            <div class="field"><label>Name</label><input type="text" id="trainerName" required></div>
+            <div class="field"><label>Email</label><input type="email" id="trainerEmail" required></div>
+          </div>
+          <div class="field"><label>Subject</label><input type="text" id="trainerSubject" required></div>
+          <button class="primary" type="submit">Add trainer</button>
+          <div class="msg" id="trainerMsg"></div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h3>Registered trainers</h3>
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Subject</th></tr></thead>
+          <tbody id="trainersBody"><tr class="empty-row"><td colspan="3">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG — point this at your deployed API Gateway stage URL
+   e.g. "https://abc123.execute-api.ap-south-1.amazonaws.com/prod"
+   ============================================================ */
+const API_BASE_URL = "https://ps9ae0wv25.execute-api.eu-north-1.amazonaws.com/prod/POST";
+
+/* ---------- Generic helpers ---------- */
+async function callApi(action, payload = {}) {
+  const res = await fetch(API_BASE_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, ...payload })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Request failed");
+  return data;
+}
+
+function showMsg(el, text, ok = true) {
+  el.textContent = text;
+  el.className = "msg " + (ok ? "ok" : "err");
+}
+
+function fmtDate(ts) {
+  if (!ts) return "–";
+  return new Date(ts).toLocaleDateString();
+}
+
+/* ---------- Nav ---------- */
+let currentView = "dashboard";
+
+const viewRefreshers = {
+  dashboard: () => { loadStats(); loadActivity(); },
+  materials: loadMaterials,
+  assignments: loadSubmissions,
+  students: loadStudents,
+  trainers: loadTrainers
+};
+
+document.querySelectorAll(".navbtn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".navbtn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    btn.classList.add("active");
+    currentView = btn.dataset.view;
+    document.getElementById("view-" + currentView).classList.add("active");
+    // Fetch fresh data the moment someone switches to a tab
+    viewRefreshers[currentView]();
+  });
+});
+
+/* ---------- Dashboard ---------- */
+async function loadStats() {
+  try {
+    const data = await callApi("getStats");
+    statStudents.textContent = data.students;
+    statTrainers.textContent = data.trainers;
+    statMaterials.textContent = data.materials;
+    statSubmissions.textContent = data.submissions;
+    document.getElementById("lastUpdated").innerHTML =
+      '<span class="live-dot"></span>Updated ' + new Date().toLocaleTimeString();
+  } catch (e) {
+    console.error(e);
+    document.getElementById("lastUpdated").textContent = "Could not refresh";
+  }
+}
+
+async function loadActivity() {
+  const list = document.getElementById("activityList");
+  try {
+    const [{ materials }, { submissions }] = await Promise.all([
+      callApi("getMaterials"),
+      callApi("getSubmissions")
+    ]);
+
+    const events = [
+      ...materials.map(m => ({
+        type: "upload", icon: "📄", time: m.timestamp,
+        text: `<strong>${m.uploader}</strong> uploaded <strong>${m.filename}</strong>`
+      })),
+      ...submissions.map(s => ({
+        type: "submission", icon: "📦", time: s.timestamp,
+        text: `<strong>${s.student_email}</strong> submitted <strong>${s.assignment_name}</strong>`
+      }))
+    ]
+      .filter(e => e.time)
+      .sort((a, b) => new Date(b.time) - new Date(a.time))
+      .slice(0, 6);
+
+    if (!events.length) {
+      list.innerHTML = `<p class="empty-note">No activity yet — upload a material or submit an assignment to see it here.</p>`;
+      return;
+    }
+
+    list.innerHTML = events.map(e => `
+      <div class="activity-item ${e.type}">
+        <div class="activity-icon">${e.icon}</div>
+        <div class="activity-text">
+          <div>${e.text}</div>
+          <div class="activity-time">${new Date(e.time).toLocaleString()}</div>
+        </div>
+      </div>`).join("");
+  } catch (e) {
+    list.innerHTML = `<p class="empty-note">Could not load activity.</p>`;
+  }
+}
+
+/* ---------- Materials: upload (trainer) ---------- */
+document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById("uploadMsg");
+  const file = materialFile.files[0];
+  const uploader = uploaderName.value.trim();
+  if (!file) return;
+
+  try {
+    // Step 1: ask the Lambda for a presigned S3 PUT url
+    const { upload_url, s3_key } = await callApi("getUploadUrl", {
+      filename: file.name,
+      content_type: file.type || "application/octet-stream",
+      uploader
+    });
+
+    // Step 2: upload the actual bytes straight to S3
+    await fetch(upload_url, { method: "PUT", body: file, headers: { "Content-Type": file.type || "application/octet-stream" } });
+
+    // Step 3: tell the Lambda the upload succeeded so it writes the DB row
+    await callApi("recordUpload", { filename: file.name, uploader, s3_key });
+
+    showMsg(msg, "Uploaded — students will be notified.", true);
+    e.target.reset();
+    loadMaterials();
+  } catch (err) {
+    showMsg(msg, err.message, false);
+  }
+});
+
+async function loadMaterials() {
+  const body = document.getElementById("materialsBody");
+  try {
+    const { materials } = await callApi("getMaterials");
+    if (!materials.length) {
+      body.innerHTML = `<tr class="empty-row"><td colspan="4">No materials uploaded yet.</td></tr>`;
+      return;
+    }
+    body.innerHTML = materials.map(m => `
+      <tr>
+        <td>${m.filename}</td>
+        <td>${m.uploader}</td>
+        <td>${fmtDate(m.timestamp)}</td>
+        <td><a class="dl-link" href="${m.download_url}" target="_blank" rel="noopener">Download</a></td>
+      </tr>`).join("");
+  } catch (e) {
+    body.innerHTML = `<tr class="empty-row"><td colspan="4">Could not load materials.</td></tr>`;
+  }
+}
+
+/* ---------- Assignments: submit (student) ---------- */
+document.getElementById("submitForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById("submitMsg");
+  const file = assignmentFile.files[0];
+  const email = studentEmail.value.trim();
+  const assignment = assignmentName.value.trim();
+  if (!file) return;
+
+  const submitBtn = e.target.querySelector("button[type=submit]");
+  submitBtn.disabled = true;
+  showMsg(msg, "Zipping file…", true);
+
+  try {
+    // Zip whatever file the student picked, in the browser, before uploading.
+    const zip = new JSZip();
+    zip.file(file.name, file);
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+
+    // Strip the original extension (if any) and append .zip
+    const baseName = file.name.replace(/\.[^/.]+$/, "") || file.name;
+    const zipFilename = baseName + ".zip";
+
+    showMsg(msg, "Uploading…", true);
+
+    const { upload_url, s3_key } = await callApi("getAssignmentUploadUrl", {
+      student_email: email,
+      assignment_name: assignment,
+      filename: zipFilename,
+      content_type: "application/zip"
+    });
+
+    await fetch(upload_url, { method: "PUT", body: zipBlob, headers: { "Content-Type": "application/zip" } });
+
+    await callApi("submitAssignment", {
+      student_email: email,
+      assignment_name: assignment,
+      filename: zipFilename,
+      s3_key
+    });
+
+    showMsg(msg, "Assignment submitted as " + zipFilename, true);
+    e.target.reset();
+    loadSubmissions();
+  } catch (err) {
+    showMsg(msg, err.message, false);
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+async function loadSubmissions() {
+  const body = document.getElementById("submissionsBody");
+  try {
+    const { submissions } = await callApi("getSubmissions");
+    if (!submissions.length) {
+      body.innerHTML = `<tr class="empty-row"><td colspan="5">No submissions yet.</td></tr>`;
+      return;
+    }
+    body.innerHTML = submissions.map(s => `
+      <tr>
+        <td>${s.student_email}</td>
+        <td>${s.assignment_name}</td>
+        <td>${s.filename}</td>
+        <td>${fmtDate(s.timestamp)}</td>
+        <td><a class="dl-link" href="${s.download_url}" target="_blank" rel="noopener">Download</a></td>
+      </tr>`).join("");
+  } catch (e) {
+    body.innerHTML = `<tr class="empty-row"><td colspan="5">Could not load submissions.</td></tr>`;
+  }
+}
+
+/* ---------- Students ---------- */
+document.getElementById("studentForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById("studentMsg");
+  try {
+    await callApi("addStudent", {
+      name: studentName.value.trim(),
+      email: studentEmailNew.value.trim(),
+      group: studentGroup.value.trim()
+    });
+    showMsg(msg, "Student added.", true);
+    e.target.reset();
+    loadStudents();
+  } catch (err) {
+    showMsg(msg, err.message, false);
+  }
+});
+
+async function loadStudents() {
+  const body = document.getElementById("studentsBody");
+  try {
+    const { students } = await callApi("getStudents");
+    if (!students.length) {
+      body.innerHTML = `<tr class="empty-row"><td colspan="3">No students yet.</td></tr>`;
+      return;
+    }
+    body.innerHTML = students.map(s => `
+      <tr><td>${s.name}</td><td>${s.email}</td><td>${s.group}</td></tr>`).join("");
+  } catch (e) {
+    body.innerHTML = `<tr class="empty-row"><td colspan="3">Could not load students.</td></tr>`;
+  }
+}
+
+/* ---------- Trainers ---------- */
+document.getElementById("trainerForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById("trainerMsg");
+  try {
+    await callApi("addTrainer", {
+      name: trainerName.value.trim(),
+      email: trainerEmail.value.trim(),
+      subject: trainerSubject.value.trim()
+    });
+    showMsg(msg, "Trainer added.", true);
+    e.target.reset();
+    loadTrainers();
+  } catch (err) {
+    showMsg(msg, err.message, false);
+  }
+});
+
+async function loadTrainers() {
+  const body = document.getElementById("trainersBody");
+  try {
+    const { trainers } = await callApi("getTrainers");
+    if (!trainers.length) {
+      body.innerHTML = `<tr class="empty-row"><td colspan="3">No trainers yet.</td></tr>`;
+      return;
+    }
+    body.innerHTML = trainers.map(t => `
+      <tr><td>${t.name}</td><td>${t.email}</td><td>${t.subject}</td></tr>`).join("");
+  } catch (e) {
+    body.innerHTML = `<tr class="empty-row"><td colspan="3">Could not load trainers.</td></tr>`;
+  }
+}
+
+/* ---------- Boot ---------- */
+loadStats();
+loadActivity();
+loadMaterials();
+loadSubmissions();
+loadStudents();
+loadTrainers();
+
+/* ---------- Auto-refresh: keep the current tab's data live ---------- */
+const AUTO_REFRESH_MS = 15000; // 15 seconds
+setInterval(() => {
+  if (document.hidden) return; // skip while the tab isn't visible, saves calls
+  viewRefreshers[currentView]();
+}, AUTO_REFRESH_MS);
+
+</script>
+</body>
+</html>
